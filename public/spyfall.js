@@ -5,6 +5,9 @@ socket.on('roomCreated', createRoom);
 socket.on('noRoom', noRoom);
 socket.on('userAdded', updateRoom);
 socket.on('joined', joinRoom);
+socket.on('userLeft', userLeft);
+socket.on('activate', activate);
+socket.on('deactivate', deactivate);
 
 // Game Info
 let state = {};
@@ -32,6 +35,20 @@ function makeRoom() {
     socket.emit('makeRoom', data);
   }
 }
+function startGame() {
+  if (state.players.length > 2) {
+    data = {
+      room: state.roomCode
+    };
+    socket.emit('startGame', data);
+  }
+}
+function endGame() {
+  data = {
+    room: state.roomCode
+  };
+  socket.emit('endGame', data);
+}
 
 // Rooms
 function createRoom(data) {
@@ -55,6 +72,25 @@ function noRoom(data) {
   document.getElementById('alerts').innerHTML = data.msg;
 }
 
+function userLeft(data) {
+  document.getElementById('lobby').style.display = 'block';
+  document.getElementById('game').style.display = 'none';
+  updateRoom(data);
+}
+
+function activate(data) {
+  state.playing = true;
+  document.getElementById('lobby').style.display = 'none';
+  document.getElementById('game').style.display = 'block';
+  document.getElementById('location').innerHTML = data.location;
+  document.getElementById('role').innerHTML = data.role;
+}
+function deactivate() {
+  state.playing = false;
+  document.getElementById('lobby').style.display = 'block';
+  document.getElementById('game').style.display = 'none';
+}
+
 // Updating Info
 function updateRoom(data) {
   state = data;
@@ -64,6 +100,7 @@ function updateRoom(data) {
     players += `<h5 class="rounded">${i + 1 + '. '}${state.players[i]}</h5>`;
   }
   document.getElementById('lobbyPlayers').innerHTML = players;
+  document.getElementById('gamePlayers').innerHTML = players;
 }
 
 // DOM Manipulation
